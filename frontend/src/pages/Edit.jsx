@@ -1,0 +1,140 @@
+import styles from './Edit.module.css';
+import backendCall from '../utils/backend';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Modal from '../components/Modal';
+import QuesBlock from '../components/QuesBlock';
+
+
+const Edit = () => {
+
+    const [modalIsVisible, setModalIsVisible] = useState(false);
+    const [gamedata, setGameData] = useState({});
+    const [type, setType] = useState("");
+    const [question, setQuestion] = useState("");
+    const [time, setTime] = useState(0);
+    const [point, setPoint] = useState(0);
+    const [numChoice, setNumChoice] = useState(2);
+    const [answers, setAnswers] = useState([]);
+
+    useEffect(() => {
+        getData();
+    }, []);
+
+    function hideModalHandler() {
+        setModalIsVisible(false);
+    }
+    function showModalHandler() {
+        setAnswers([]);
+        setModalIsVisible(true);
+    }
+
+    function getId() {
+        let url = window.location.href;
+        url = url.split('/');
+        return url[url.length -1]
+    }
+
+    function getData() {
+        const path = '/admin/quiz/' + getId();
+        backendCall(path, {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
+            setGameData(data);
+        }).catch(error => {
+            console.log(error);
+            alert(error);
+        })
+        return display()
+    }
+
+    function newQues() {
+
+        let answersTemp = [];
+        for(let i=0; i<numChoice; i++) {
+            answersTemp.push(document.getElementById(i).value)
+        }
+        setAnswers(answersTemp);
+
+        let quesData = {
+            id: Date.now(),
+            type: type,
+            question: question,
+            time: time,
+            point: point,
+            answers: answersTemp
+        }
+        hideModalHandler();
+        let newData = gamedata;
+        newData.questions.push(quesData);
+        setGameData(newData);
+
+        const path = '/admin/quiz/' + getId();
+        backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
+        }).catch(error => {
+            console.log(error);
+            alert(error);
+        })
+    }
+
+    function generateChoiceInput() {
+
+        let inputs = [];
+        for(let i=0; i<numChoice; i++) {
+            inputs.push(
+                <input type="text" id= {i} />
+            )
+            inputs.push(
+                <br />
+            )
+        }
+    }
+
+    function display() {
+        return (
+            <div className={styles.quesContainer}>
+                {console.log(gamedata.questions)}
+                {gamedata.questions.map((data) => <QuesBlock data={data}/>)}
+            </div>
+        )
+    }
+
+
+    return (
+        <div>
+            {modalIsVisible && (
+                <Modal hide={hideModalHandler}>
+
+                    Type of question<br />
+                    <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} /> 
+                    <label htmlFor="single">single choice</label> 
+                    <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} /> 
+                    <label htmlFor="single">multiple choice</label> <br />
+
+                    The question:
+                    <input type="text" onChange={(event) => setQuestion(event.target.value)}/> <br />
+
+                    Time limit: 
+                    <input type="range" name="time" min="0" max="60" defaultValue={0} onChange={(event) => setTime(event.target.value)}/>
+                    {<label htmlFor="name">{time}s</label> }<br />
+
+                    Points for the question
+                    <input type="range" name="point" min="0" max="50" defaultValue={0} onChange={(event) => setPoint(event.target.value)}/>
+                    {<label htmlFor="point">{point} points</label> }<br />
+
+                    Number of choices
+                    <input type="range" name="numChoice" min="2" max="6" defaultValue={2} onChange={(event) => setNumChoice(event.target.value)}/>
+                    {<label htmlFor="numChoice">{numChoice} choices</label> }<br />
+
+                    Answers: <br />
+                    {generateChoiceInput()}
+
+                    <button onClick={newQues}> Confirm </button>
+                    <button onClick={hideModalHandler}> Cnacel </button>
+                </Modal>
+            )}
+            <button onClick={showModalHandler}> Add a question </button>
+            {display()}
+        </div>
+    );
+}
+
+export default Edit;
