@@ -22,6 +22,7 @@ const Edit = () => {
     const [point, setPoint] = useState(0);
     const [numChoice, setNumChoice] = useState(2);
     const [answers, setAnswers] = useState([]);
+    const [source, setSource] = useState("");
 
     useEffect(() => {
         getData();
@@ -60,11 +61,19 @@ const Edit = () => {
 
         let answersTemp = [];
         for(let i=0; i<numChoice; i++) {
-            if (document.getElementById(i) == "") {
-                alert("please fill in all the answers");
-                return;
+            let dump = {};
+            if (document.getElementById("radio"+i).checked) {
+                dump = {
+                    answer: document.getElementById(i).value,
+                    isRight: true
+                }
+            } else {
+                dump = {
+                    answer: document.getElementById(i).value,
+                    isRight: false
+                }
             }
-            answersTemp.push(document.getElementById(i).value)
+            answersTemp.push(dump)
         }
         setAnswers(answersTemp);
 
@@ -79,7 +88,8 @@ const Edit = () => {
             question: question,
             time: time,
             point: point,
-            answers: answersTemp
+            answers: answersTemp,
+            source: source
         }
         hideModalHandler();
         let newData = gamedata;
@@ -114,6 +124,12 @@ const Edit = () => {
         for(let i=0; i<numChoice; i++) {
             inputs.push(
                 <input type="text" id= {i} />
+            )
+            inputs.push(
+                "right answer?"
+            )
+            inputs.push(
+                <input type="radio" id= {"radio"+i}/>
             )
             inputs.push(
                 <br />
@@ -154,6 +170,9 @@ const Edit = () => {
                     Points for the question
                     <input type="range" name="point" min="0" max="50" defaultValue={0} onChange={(event) => setPoint(event.target.value)}/>
                     {<label htmlFor="point">{point} points</label> }<br />
+
+                    URL of the media source: (optional)
+                    <input type="text" onChange={(event) => setSource(event.target.value)}/> <br />
 
                     Number of choices
                     <input type="range" name="numChoice" min="2" max="6" defaultValue={2} onChange={(event) => setNumChoice(event.target.value)}/>

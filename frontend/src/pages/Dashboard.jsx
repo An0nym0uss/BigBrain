@@ -8,14 +8,16 @@ import backendCall from '../utils/backend';
 import serverRequest from '../utils/server';
 import Modal from '../components/Modal';
 import GameBlock from '../components/GameBlock';
-
+import { Context, useContext } from "../utils/context";
 
 const Dashboard = () => {
     const navigate = useNavigate();
 
     const [modalIsVisible, setModalIsVisible] = useState(false);
+    const [toresult, setToresult] = useState(false);
     const [quizName, setQuizName] = useState('');
     const [quizList, setQuizList] = useState([{}]);
+    const { getters, setters } = useContext(Context);
 
     React.useEffect(() => {
         if (!localStorage.getItem('token')) {
@@ -32,6 +34,13 @@ const Dashboard = () => {
     }
     function showModalHandler() {
         setModalIsVisible(true);
+    }
+
+    function hideToresultHandler() {
+        setToresult(false);
+    }
+    function showToresultHandler() {
+        setToresult(true);
     }
 
     const handleLogout = () => {
@@ -57,11 +66,23 @@ const Dashboard = () => {
     function getQuizHandler() {
         backendCall('/admin/quiz', {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
             setQuizList(quizList.concat(data.quizzes));
-            console.log(data.quizzes);
         }).catch(error => {
             console.log(error);
             alert(error);
         })
+    }
+
+    function stopGame() {
+
+        console.log("quizid:" + getters.quizid);
+        let path = '/admin/quiz/' + getters.quizid + '/end';
+        backendCall(path, {}, 'POST', { token: localStorage.getItem('token') }).then(() => {
+        }).catch(error => {
+            console.log(error);
+            alert(error);
+        })
+        setters.setSessionStarted(false);
+        showToresultHandler();
     }
 
     function display() {
@@ -70,6 +91,10 @@ const Dashboard = () => {
                 {quizList.map((data) => <GameBlock data={data}/>)}
             </div>
         )
+    }
+
+    function toResultPage() {
+        navigate(`/play/${getters.sessionid}`);
     }
 
     return (
@@ -83,8 +108,17 @@ const Dashboard = () => {
                     <button onClick={hideModalHandler}> Cnacel </button>
                 </Modal>
             )}
+            {toresult && (
+                <Modal hide={hideModalHandler}>
+                    Do you want to go to the result page? <br />
+                    <button onClick={toResultPage}>yes</button>
+                    <button onClick={hideToresultHandler}>no</button>
+                </Modal>
+            )}
             <Button onClick={handleLogout}>Logout</Button>
             <Button onClick={showModalHandler}>New quiz</Button>
+            <Button onClick={stopGame}> stop current game </Button>
+            <Button onClick={toResultPage}> manage current game </Button>
             {display()}
         </div>
     );
