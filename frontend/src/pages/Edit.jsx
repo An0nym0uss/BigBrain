@@ -9,7 +9,13 @@ import QuesBlock from '../components/QuesBlock';
 const Edit = () => {
 
     const [modalIsVisible, setModalIsVisible] = useState(false);
-    const [gamedata, setGameData] = useState({});
+    const [gamedata, setGameData] = useState([{
+        id: 1,
+        questilon: "a question",
+        point: "10",
+        time: "25",
+        type: "single"
+    }]);
     const [type, setType] = useState("");
     const [question, setQuestion] = useState("");
     const [time, setTime] = useState(0);
@@ -20,6 +26,10 @@ const Edit = () => {
     useEffect(() => {
         getData();
     }, []);
+
+    useEffect(() => {
+        updateData();
+    }, [gamedata]);
 
     function hideModalHandler() {
         setModalIsVisible(false);
@@ -50,9 +60,18 @@ const Edit = () => {
 
         let answersTemp = [];
         for(let i=0; i<numChoice; i++) {
+            if (document.getElementById(i) == "") {
+                alert("please fill in all the answers");
+                return;
+            }
             answersTemp.push(document.getElementById(i).value)
         }
         setAnswers(answersTemp);
+
+        if (type == "" || question == "" || time == "0" || answers == []) {
+            alert("please fill in all the required field");
+            return;
+        }
 
         let quesData = {
             id: Date.now(),
@@ -66,13 +85,27 @@ const Edit = () => {
         let newData = gamedata;
         newData.questions.push(quesData);
         setGameData(newData);
+        updateData();
+        reset();
+    }
 
+    function updateData() {
+
+        console.log(gamedata.questions);
         const path = '/admin/quiz/' + getId();
         backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
         }).catch(error => {
             console.log(error);
             alert(error);
         })
+    }
+
+    function reset() {
+        setAnswers([]);
+        setType("");
+        setPoint(0);
+        setTime(0);
+        setQuestion("");
     }
 
     function generateChoiceInput() {
@@ -86,15 +119,17 @@ const Edit = () => {
                 <br />
             )
         }
+        return inputs;
     }
 
     function display() {
-        return (
-            <div className={styles.quesContainer}>
-                {console.log(gamedata.questions)}
-                {gamedata.questions.map((data) => <QuesBlock data={data}/>)}
-            </div>
-        )
+        if (gamedata.questions) {
+            return (
+                <div className={styles.quesContainer}>
+                    {gamedata.questions.map((data) => <QuesBlock data={data} setData={setGameData}/>)}
+                </div>
+            );}
+        return <div>loading...</div>
     }
 
 
