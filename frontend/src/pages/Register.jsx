@@ -2,12 +2,14 @@ import React from 'react';
 import { Box, Button, TextField } from '@mui/material';
 import backendCall from '../utils/backend';
 import { useNavigate } from 'react-router-dom';
+import AlertMsg from '../components/AlertMsg';
 
 const Register = () => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [name, setName] = React.useState('');
+  const [alert, setAlert] = React.useState(null);
 
   const register = () => {
     if (email === '' || password === '') {
@@ -23,18 +25,19 @@ const Register = () => {
         localStorage.setItem('token', token);
         navigate('/');
       })
-      .catch((err) => {
+      .catch(err => {
         if (err.message) {
-          alert(err.message);
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
         } else {
-          console.log(err);
+          console.error(err);
         }
-      })
+      });
   }
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {alert}
+      <Box sx={{ mt: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <TextField required id='register-email' label='Email' onChange={(e) => { setEmail(e.target.value) }} sx={{ mb: '20px' }} />
         <TextField required id='register-password' type='password' label='Password' onChange={(e) => { setPassword(e.target.value) }} sx={{ mb: '20px' }} />
         <TextField required id='register-name' label='name' onChange={(e) => { setName(e.target.value) }} sx={{ mb: '20px' }} />

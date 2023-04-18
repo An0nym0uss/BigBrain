@@ -7,6 +7,8 @@ import Edit from './pages/Edit';
 import QuesEdit from './pages/QuesEdit';
 import Results from './pages/Results';
 import { Context, initialValue } from './utils/context';
+import Join from './pages/Join';
+import Play from './pages/Play';
 
 function App () {
   const [sessionid, setSessionid] = React.useState(initialValue.sessionid);
@@ -34,7 +36,9 @@ function App () {
           <Route path='/register' element={<Register />} />
           <Route path='/edit/:id' element={<Edit />} />
           <Route path='/edit/:id/:quesid' element={<QuesEdit />} />
-          <Route path='/play/:id' element={<Results />} />
+          <Route path='/result/:sid' element={<Results />} />
+          <Route path='/play/join' element={<Join />} />
+          <Route path='/play/:sid' element={<Play />} />
         </Routes>
       </BrowserRouter>
     </Context.Provider>

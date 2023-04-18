@@ -1,6 +1,7 @@
 import backendCall from '../utils/backend';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AlertMsg from '../components/AlertMsg';
 
 const QuesEdit = () => {
   const [type, setType] = useState('');
@@ -16,6 +17,7 @@ const QuesEdit = () => {
   const [point, setPoint] = useState(0);
   const [numChoice, setNumChoice] = useState(2);
   const [answers, setAnswers] = useState([]);
+  const [alert, setAlert] = useState(null);
 
   const navigate = useNavigate();
 
@@ -27,43 +29,48 @@ const QuesEdit = () => {
     updateData();
   }, [gamedata]);
 
-  function toEditPage () {
+  const toEditPage = () => {
     navigate(`/edit/${getId()}`);
   }
 
-  function getId () {
+  const getId = () => {
     let url = window.location.href;
     url = url.split('/');
     return url[url.length - 2]
   }
 
-  function getQuesId () {
+  const getQuesId = () => {
     let url = window.location.href;
     url = url.split('/');
     return url[url.length - 1]
   }
 
-  function getData () {
+  const getData = () => {
     const path = '/admin/quiz/' + getId();
-    backendCall(path, {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
-      setGameData(data);
-      for (const ques of data.questions) {
-        if (ques.id === getQuesId()) {
-          setType(ques.type);
-          setQuestion(ques.question);
-          setTime(ques.time);
-          setPoint(ques.point);
-          setAnswers(ques.answers);
-          setNumChoice(ques.answers.length)
+    backendCall(path, {}, 'GET', { token: localStorage.getItem('token') })
+      .then((data) => {
+        setGameData(data);
+        for (const ques of data.questions) {
+          if (ques.id === getQuesId()) {
+            setType(ques.type);
+            setQuestion(ques.question);
+            setTime(ques.time);
+            setPoint(ques.point);
+            setAnswers(ques.answers);
+            setNumChoice(ques.answers.length)
+          }
         }
-      }
-    }).catch(error => {
-      console.log(error);
-      alert(error);
-    })
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
+        } else {
+          console.error(err);
+        }
+      });
   }
 
-  function update () {
+  const update = () => {
     const answersTemp = [];
     for (let i = 0; i < numChoice; i++) {
       if (document.getElementById(i) === '') {
@@ -99,59 +106,64 @@ const QuesEdit = () => {
     toEditPage();
   }
 
-  function updateData () {
+  const updateData = () => {
     console.log(gamedata.questions);
     const path = '/admin/quiz/' + getId();
-    backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
-    }).catch(error => {
-      console.log(error);
-      alert(error);
-    })
+    backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') })
+      .then(() => {
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
+        } else {
+          console.error(err);
+        }
+      });
   }
 
-  function generateChoiceInput () {
+  const generateChoiceInput = () => {
     const inputs = [];
     for (let i = 0; i < numChoice; i++) {
       inputs.push(
-                <input type="text" id= {i} value={answers[i]}/>
+        <input type="text" id={i} value={answers[i]} />
       )
       inputs.push(
-                <br />
+        <br />
       )
     }
     return inputs;
   }
 
   return (
-        <div>
-            Type of question<br />
-            <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} />
-            <label htmlFor="single">single choice</label>
-            <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} />
-            <label htmlFor="single">multiple choice</label> <br />
+    <div>
+      {alert}
+      Type of question<br />
+      <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} />
+      <label htmlFor="single">single choice</label>
+      <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} />
+      <label htmlFor="single">multiple choice</label> <br />
 
-            The question:
-            <input type="text" value={question} onChange={(event) => setQuestion(event.target.value)}/> <br />
+      The question:
+      <input type="text" value={question} onChange={(event) => setQuestion(event.target.value)} /> <br />
 
-            Time limit:
-            <input type="range" value={time} name="time" min="0" max="60" defaultValue={0} onChange={(event) => setTime(event.target.value)}/>
-            {<label htmlFor="name">{time}s</label> }<br />
+      Time limit:
+      <input type="range" value={time} name="time" min="0" max="60" defaultValue={0} onChange={(event) => setTime(event.target.value)} />
+      {<label htmlFor="name">{time}s</label>}<br />
 
-            Points for the question
-            <input type="range" value={point} name="point" min="0" max="50" defaultValue={0} onChange={(event) => setPoint(event.target.value)}/>
-            {<label htmlFor="point">{point} points</label> }<br />
+      Points for the question
+      <input type="range" value={point} name="point" min="0" max="50" defaultValue={0} onChange={(event) => setPoint(event.target.value)} />
+      {<label htmlFor="point">{point} points</label>}<br />
 
-            Number of choices
-            <input type="range" value={numChoice} name="numChoice" min="2" max="6" defaultValue={2} onChange={(event) => setNumChoice(event.target.value)}/>
-            {<label htmlFor="numChoice">{numChoice} choices</label> }<br />
+      Number of choices
+      <input type="range" value={numChoice} name="numChoice" min="2" max="6" defaultValue={2} onChange={(event) => setNumChoice(event.target.value)} />
+      {<label htmlFor="numChoice">{numChoice} choices</label>}<br />
 
-            Answers: <br />
-            {generateChoiceInput()}
+      Answers: <br />
+      {generateChoiceInput()}
 
-            <button onClick={update}> Update </button>
-            <button onClick={toEditPage}> Cancel </button>
-
-        </div>
+      <button onClick={update}> Update </button>
+      <button onClick={toEditPage}> Cancel </button>
+    </div>
   );
 }
 
