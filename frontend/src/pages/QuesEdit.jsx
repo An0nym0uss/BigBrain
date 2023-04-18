@@ -35,13 +35,13 @@ const QuesEdit = () => {
 
   const getId = () => {
     let url = window.location.href;
-    url = url.split('/');
+    url = url.split('/dashboard');
     return url[url.length - 2]
   }
 
   const getQuesId = () => {
     let url = window.location.href;
-    url = url.split('/');
+    url = url.split('/dashboard');
     return url[url.length - 1]
   }
 
@@ -74,7 +74,8 @@ const QuesEdit = () => {
     const answersTemp = [];
     for (let i = 0; i < numChoice; i++) {
       if (document.getElementById(i) === '') {
-        alert('please fill in all the answers');
+        const errMsg = 'please fill in all the answers';
+        setAlert(<AlertMsg message={errMsg} successor={() => setAlert(null)} />)
         return;
       }
       answersTemp.push(document.getElementById(i).value)
@@ -82,7 +83,8 @@ const QuesEdit = () => {
     setAnswers(answersTemp);
 
     if (type === '' || question === '' || time === '0' || answers === []) {
-      alert('please fill in all the required field');
+      const errMsg = 'please fill in all the required field';
+      setAlert(<AlertMsg message={errMsg} successor={() => setAlert(null)} />)
       return;
     }
 

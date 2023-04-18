@@ -16,14 +16,14 @@ const Block = styled.div`
 `;
 
 const GameBlock = ({ gameData, refresh }) => {
+  const navigate = useNavigate();
+
   const [sessionId, setSessionId] = useState(gameData.active);
   const [alert, setAlert] = useState(null);
   const [openResultModal, setOpenResultModal] = useState(false);
 
-  const navigate = useNavigate();
-
   const startGame = () => {
-    const path = '/admin/quiz/' + gameData.id + '/' + 'start';
+    const path = `/admin/quiz/${gameData.id}/start`;
     backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
       .then(() => {
       })
@@ -80,7 +80,7 @@ const GameBlock = ({ gameData, refresh }) => {
   }
 
   const clipboard = () => {
-    navigator.clipboard.writeText('localhost:3000/play' + sessionId);
+    navigator.clipboard.writeText(`/play/${sessionId}`);
   }
 
   const toResult = () => {

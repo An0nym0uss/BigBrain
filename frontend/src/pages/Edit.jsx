@@ -125,7 +125,7 @@ const Edit = () => {
     setQuestion('');
   }
 
-  const SingleChoice = ({ index }) => {
+  const SingleChoice = () => {
     const [selected, setSelected] = useState(null);
 
     return (
@@ -216,7 +216,7 @@ const Edit = () => {
           <button onClick={() => setModalIsVisible(false)}> Cancel </button>
         </Modal>
       )}
-      <Button onClick={() => navigate('/')}>back</Button>
+      <Button onClick={() => navigate('/dashboard')}>back</Button>
       <Button variant='contained' onClick={showModalHandler} sx={{ ml: '30px' }}> Add a question </Button>
       {display()}
     </div>

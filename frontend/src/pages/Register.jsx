@@ -13,17 +13,19 @@ const Register = () => {
 
   const register = () => {
     if (email === '' || password === '') {
-      alert('Email or password cannot be empty.');
+      const errMsg = 'Email or password cannot be empty.';
+      setAlert(<AlertMsg message={errMsg} successor={() => setAlert(null)} />)
       return;
     }
     if (name === '') {
-      alert('Name cannot be empty.');
+      const errMsg = 'Name cannot be empty.';
+      setAlert(<AlertMsg message={errMsg} successor={() => setAlert(null)} />)
       return;
     }
     backendCall('admin/auth/register', { email, password, name }, 'POST')
       .then(({ token }) => {
         localStorage.setItem('token', token);
-        navigate('/');
+        navigate('/dashboard');
       })
       .catch(err => {
         if (err.message) {
