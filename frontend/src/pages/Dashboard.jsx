@@ -1,32 +1,32 @@
 /* eslint-disable no-console */
 
-import styles from './Dashboard.module.css';
 import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backendCall from '../utils/backend';
 import Modal from '../components/Modal';
 import GameBlock from '../components/GameBlock';
-import { Context, useContext } from '../utils/context';
 import AlertMsg from '../components/AlertMsg';
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
   const [modalIsVisible, setModalIsVisible] = useState(false);
-  const [toresult, setToresult] = useState(false);
   const [quizName, setQuizName] = useState('');
   const [quizList, setQuizList] = useState([]);
   const [alert, setAlert] = React.useState(null);
-
-  const { getters, setters } = useContext(Context);
+  const [refresh, setRefresh] = React.useState(false);
 
   React.useEffect(() => {
     if (!localStorage.getItem('token')) {
       navigate('/login');
     }
     getQuizHandler();
-  }, []);
+  }, [refresh]);
+
+  const handleToggleRefresh = () => {
+    setRefresh(prevRefresh => !prevRefresh);
+  }
 
   const hideModalHandler = () => {
     setModalIsVisible(false);
@@ -34,14 +34,6 @@ const Dashboard = () => {
 
   const showModalHandler = () => {
     setModalIsVisible(true);
-  }
-
-  const hideToresultHandler = () => {
-    setToresult(false);
-  }
-
-  const showToresultHandler = () => {
-    setToresult(true);
   }
 
   const handleLogout = () => {
@@ -88,40 +80,17 @@ const Dashboard = () => {
       });
   }
 
-  const stopGame = () => {
-    console.log('quizid:' + getters.quizid);
-    const path = '/admin/quiz/' + getters.quizid + '/end';
-    backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
-      .then(() => {
-      })
-      .catch(err => {
-        if (err.message) {
-          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
-        } else {
-          console.error(err);
-        }
-      });
-    setters.setSessionStarted(false);
-    showToresultHandler();
-  }
-
   const display = () => {
     return (
-      <div className={styles.gameContainer}>
-        {quizList.map((data, index) => <GameBlock key={index} data={data} />)}
+      <div style={{ display: 'flex', flexDirection: 'column', rowGap: '20px', margin: '20px' }}>
+        {quizList.map((data, index) => <GameBlock key={index} gameData={data} refresh={handleToggleRefresh} />)}
       </div>
     )
-  }
-
-  const toResultPage = () => {
-    navigate(`/result/${getters.sessionid}`);
   }
 
   return (
     <div>
       {alert}
-      Dashboard!
-      <Button onClick={handleLogout}>Logout</Button>
 
       {modalIsVisible && (
         <Modal hide={hideModalHandler}>
@@ -131,16 +100,10 @@ const Dashboard = () => {
           <button onClick={hideModalHandler}> Cnacel </button>
         </Modal>
       )}
-      {toresult && (
-        <Modal hide={hideModalHandler}>
-          Do you want to go to the result page? <br />
-          <button onClick={toResultPage}>yes</button>
-          <button onClick={hideToresultHandler}>no</button>
-        </Modal>
-      )}
-      <Button onClick={showModalHandler}>New quiz</Button>
-      <Button onClick={stopGame}> stop current game </Button>
-      <Button onClick={toResultPage}> manage current game </Button>
+      <div style={{ margin: '20px' }}>
+        <Button variant='contained' onClick={showModalHandler} sx={{ mr: '170px' }}>New quiz</Button>
+        <Button variant='outlined' onClick={handleLogout}>Logout</Button>
+      </div>
       {display()}
     </div>
   );

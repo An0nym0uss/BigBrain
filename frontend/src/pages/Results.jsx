@@ -1,17 +1,33 @@
 import React from 'react';
 import backendCall from '../utils/backend';
-import { useNavigate } from 'react-router-dom';
-import { Context, useContext } from '../utils/context';
+import { useNavigate, useParams } from 'react-router-dom';
 import AlertMsg from '../components/AlertMsg';
+import { Button } from '@mui/material';
 
 const Results = () => {
-  const { getters, setters } = useContext(Context);
+  const { qid } = useParams();
+  const [sessionId, setSessionId] = React.useState(null);
   const [alert, setAlert] = React.useState(null);
 
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    backendCall(`/admin/quiz/${qid}`, {}, 'GET', { token: localStorage.getItem('token') })
+      .then((data) => {
+        console.log(data);
+        setSessionId(data.active);
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
+        } else {
+          console.error(err);
+        }
+      });
+  }, []);
+
   const advance = () => {
-    const path = '/admin/quiz/' + getters.quizid + '/' + 'start';
+    const path = '/admin/quiz/' + qid + '/' + 'start';
     backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
       .then(() => {
       })
@@ -25,9 +41,10 @@ const Results = () => {
   }
 
   const stopGame = () => {
-    const path = '/admin/quiz/' + getters.quizid + '/end';
+    const path = '/admin/quiz/' + qid + '/end';
     backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
       .then(() => {
+        setSessionId(null);
       })
       .catch(err => {
         if (err.message) {
@@ -36,29 +53,29 @@ const Results = () => {
           console.error(err);
         }
       });
-    setters.setSessionStarted(false);
   }
 
-  const toHome = () => {
+  const toDashboard = () => {
     navigate('/');
   }
 
   return (
-    <>
+    <div style={{ margin: '20px' }}>
       {alert}
+      <Button variant='outlined' onClick={(toDashboard)} sx={{ mb: '20px' }}>Back</Button>
       <div>
         {/* current session haven't ended yet */}
-        {getters.sessionStarted && (
-          <div>
+        {sessionId === null
+          ? <div>
+            Results: <br />
+          </div>
+          : <div>
             <button onClick={advance}>advance a question</button>
             <button onClick={stopGame}>stop this quiz</button>
           </div>
-        )}
-        {/* current session has ended */}
-        Results: <br />
-        <button onClick={toHome}>Back</button>
+        }
       </div>
-    </>
+    </div>
   );
 }
 

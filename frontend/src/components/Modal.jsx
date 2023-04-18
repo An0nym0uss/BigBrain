@@ -1,14 +1,14 @@
 import React from 'react';
 import styles from './Modal.module.css';
 
-function Modal (props) {
+const Modal = ({ hide, children }) => {
   return (
-        <>
-            <div className={styles.backdrop} onClick={props.hide} />
-            <dialog open className={styles.modal}>
-                {props.children}
-            </dialog>
-        </>
+    <>
+      <div className={styles.backdrop} onClick={hide} />
+      <dialog open className={styles.modal}>
+        {children}
+      </dialog>
+    </>
   );
 }
 

@@ -6,24 +6,14 @@ import Dashboard from './pages/Dashboard';
 import Edit from './pages/Edit';
 import QuesEdit from './pages/QuesEdit';
 import Results from './pages/Results';
-import { Context, initialValue } from './utils/context';
+import { Context } from './utils/context';
 import Join from './pages/Join';
 import Play from './pages/Play';
 
 function App () {
-  const [sessionid, setSessionid] = React.useState(initialValue.sessionid);
-  const [quizid, setQuizid] = React.useState(initialValue.quizid);
-  const [sessionStarted, setSessionStarted] = React.useState(initialValue.sessionStarted);
-
   const getters = {
-    sessionid,
-    quizid,
-    sessionStarted,
   };
   const setters = {
-    setSessionid,
-    setQuizid,
-    setSessionStarted,
   };
 
   return (
@@ -36,7 +26,7 @@ function App () {
           <Route path='/register' element={<Register />} />
           <Route path='/edit/:id' element={<Edit />} />
           <Route path='/edit/:id/:quesid' element={<QuesEdit />} />
-          <Route path='/result/:sid' element={<Results />} />
+          <Route path='/result/:qid' element={<Results />} />
           <Route path='/play/join' element={<Join />} />
           <Route path='/play/:sid' element={<Play />} />
         </Routes>

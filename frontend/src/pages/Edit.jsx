@@ -1,25 +1,20 @@
-import styles from './Edit.module.css';
 import backendCall from '../utils/backend';
 import React, { useState, useEffect } from 'react';
 import Modal from '../components/Modal';
 import QuesBlock from '../components/QuesBlock';
 import AlertMsg from '../components/AlertMsg';
+import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const Edit = () => {
+  const navigate = useNavigate();
   const [modalIsVisible, setModalIsVisible] = useState(false);
-  const [gamedata, setGameData] = useState([{
-    id: 1,
-    questilon: 'a question',
-    point: '10',
-    time: '25',
-    type: 'single'
-  }]);
-  const [type, setType] = useState('');
+  const [gamedata, setGameData] = useState([]);
+  const [type, setType] = useState('single');
   const [question, setQuestion] = useState('');
   const [time, setTime] = useState(0);
   const [point, setPoint] = useState(0);
   const [numChoice, setNumChoice] = useState(2);
-  const [answers, setAnswers] = useState([]);
   const [source, setSource] = useState('');
   const [alert, setAlert] = useState(null);
 
@@ -31,11 +26,7 @@ const Edit = () => {
     updateData();
   }, [gamedata]);
 
-  const hideModalHandler = () => {
-    setModalIsVisible(false);
-  }
   const showModalHandler = () => {
-    setAnswers([]);
     setModalIsVisible(true);
   }
 
@@ -62,26 +53,36 @@ const Edit = () => {
   }
 
   const newQues = () => {
-    const answersTemp = [];
+    const answers = [];
+    let isAnswerSelected = false;
     for (let i = 0; i < numChoice; i++) {
       let dump = {};
-      if (document.getElementById('radio' + i).checked) {
+      if (document.getElementById('choice' + i).checked) {
         dump = {
           answer: document.getElementById(i).value,
           isRight: true
         }
+        isAnswerSelected = true;
       } else {
         dump = {
           answer: document.getElementById(i).value,
           isRight: false
         }
       }
-      answersTemp.push(dump)
+      answers.push(dump)
     }
-    setAnswers(answersTemp);
+    console.log('tempAnswer:', answers);
 
-    if (type === '' || question === '' || time === '0' || answers === []) {
-      alert('please fill in all the required field');
+    let errMsg = '';
+    if (question === '') {
+      errMsg = 'question';
+    } else if (time === 0) {
+      errMsg = 'time';
+    } else if (!isAnswerSelected) {
+      errMsg = 'answers';
+    }
+    if (errMsg) {
+      setAlert(<AlertMsg message={`please select/fill ${errMsg}`} successor={() => setAlert(null)} />);
       return;
     }
 
@@ -91,10 +92,10 @@ const Edit = () => {
       question,
       time,
       point,
-      answers: answersTemp,
+      answers,
       source
     }
-    hideModalHandler();
+    setModalIsVisible(false);
     const newData = gamedata;
     newData.questions.push(quesData);
     setGameData(newData);
@@ -103,7 +104,6 @@ const Edit = () => {
   }
 
   const updateData = () => {
-    console.log(gamedata.questions);
     const path = '/admin/quiz/' + getId();
     backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') })
       .then(() => {
@@ -118,36 +118,56 @@ const Edit = () => {
   }
 
   const reset = () => {
-    setAnswers([]);
-    setType('');
+    setType('single');
     setPoint(0);
     setTime(0);
+    setNumChoice(2);
     setQuestion('');
   }
 
+  const SingleChoice = ({ index }) => {
+    const [selected, setSelected] = useState(null);
+
+    return (
+      Array.from({ length: numChoice }, (_, index) => (
+        <div key={`chocice-${index}`}>
+          <label>
+            <input type='text' id={index} />
+            &nbsp; right answer?
+            <input type='radio' id={'choice' + index} checked={selected === index} onChange={() => setSelected(index)} />
+          </label>
+        </div>
+      ))
+    );
+  }
+
+  const MultiChoice = ({ index }) => {
+    const [selected, setSelected] = useState(false);
+
+    return (
+      <div>
+        <input type='text' id={index} />
+        &nbsp; right answer?
+        <input type='checkbox' id={'choice' + index} checked={selected} onChange={() => setSelected(!selected)} />
+      </div>
+    );
+  }
   const generateChoiceInput = () => {
-    const inputs = [];
-    for (let i = 0; i < numChoice; i++) {
-      inputs.push(
-        <input type="text" id={i} />
-      )
-      inputs.push(
-        'right answer?'
-      )
-      inputs.push(
-        <input type="radio" id={'radio' + i} />
-      )
-      inputs.push(
-        <br />
-      )
+    if (type === 'single') {
+      return (
+        <SingleChoice />
+      );
+    } else if (type === 'multi') {
+      return Array.from({ length: numChoice }, (_, index) => (
+        <MultiChoice key={`chocice-${index}`} index={index} />
+      ));
     }
-    return inputs;
   }
 
   const display = () => {
     if (gamedata.questions) {
       return (
-        <div className={styles.quesContainer}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {gamedata.questions.map((data, index) => <QuesBlock key={`question-${index}`} data={data} setData={setGameData} />)}
         </div>
       );
@@ -155,14 +175,18 @@ const Edit = () => {
     return <div>loading...</div>
   }
 
+  const handleHideModal = () => {
+    reset();
+    setModalIsVisible(false);
+  }
+
   return (
     <div>
       {alert}
       {modalIsVisible && (
-        <Modal hide={hideModalHandler}>
-
+        <Modal hide={handleHideModal}>
           Type of question<br />
-          <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} />
+          <input type="radio" id="single" name="type" value="single" defaultChecked onClick={(event) => setType(event.target.value)} />
           <label htmlFor="single">single choice</label>
           <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} />
           <label htmlFor="single">multiple choice</label> <br />
@@ -189,10 +213,11 @@ const Edit = () => {
           {generateChoiceInput()}
 
           <button onClick={newQues}> Confirm </button>
-          <button onClick={hideModalHandler}> Cancel </button>
+          <button onClick={() => setModalIsVisible(false)}> Cancel </button>
         </Modal>
       )}
-      <button onClick={showModalHandler}> Add a question </button>
+      <Button onClick={() => navigate('/')}>back</Button>
+      <Button variant='contained' onClick={showModalHandler} sx={{ ml: '30px' }}> Add a question </Button>
       {display()}
     </div>
   );

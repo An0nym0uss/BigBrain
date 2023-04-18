@@ -1,76 +1,132 @@
-import styles from './GameBlock.module.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import backendCall from '../utils/backend';
 import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
-import { Context, useContext } from '../utils/context';
 import AlertMsg from './AlertMsg';
+import { Button } from '@mui/material';
+import styled from 'styled-components';
 
-const GameBlock = (props) => {
-  const [modalIsVisible, setModalIsVisible] = useState(false);
-  const [sessionId, setSessionId] = useState(0);
+const Block = styled.div`
+  position: relative;
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 380px;
+  min-height: 120px;
+  padding: 10px;
+`;
+
+const GameBlock = ({ gameData, refresh }) => {
+  const [sessionId, setSessionId] = useState(gameData.active);
   const [alert, setAlert] = useState(null);
-  const { setters } = useContext(Context);
+  const [openResultModal, setOpenResultModal] = useState(false);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log('sessionid:' + sessionId);
-    setters.setSessionid(sessionId);
-  }, [sessionId]);
-
-  const hideModalHandler = () => {
-    setModalIsVisible(false);
-  }
-  const showModalHandler = () => {
-    setModalIsVisible(true);
-  }
-
   const startGame = () => {
-    const path = '/admin/quiz/' + props.data.id + '/' + 'start';
+    const path = '/admin/quiz/' + gameData.id + '/' + 'start';
     backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
       .then(() => {
       })
       .catch(err => {
         if (err.message) {
-          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />);
         } else {
           console.error(err);
         }
       });
-    setSessionId(Date.now());
-    showModalHandler();
-    setters.setQuizid(props.data.id);
-    setters.setSessionStarted(true);
-    setters.setSessionid(sessionId);
+
+    backendCall(`/admin/quiz/${gameData.id}`, {}, 'GET', { token: localStorage.getItem('token') })
+      .then((data) => {
+        setSessionId(data.active);
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />);
+        } else {
+          console.error(err);
+        }
+      });
   }
 
-  const toEditPage = () => {
-    navigate(`/edit/${props.data.id}`);
+  const stopGame = () => {
+    console.log('quizid:' + gameData.id);
+    const path = '/admin/quiz/' + gameData.id + '/end';
+    backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
+      .then(() => {
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />);
+        } else {
+          console.error(err);
+        }
+      });
+    setSessionId(null);
+    setOpenResultModal(true);
+  }
+
+  const deleteGame = () => {
+    backendCall(`/admin/quiz/${gameData.id}`, {}, 'DELETE', { token: localStorage.getItem('token') })
+      .then(() => {
+        refresh();
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />);
+        } else {
+          console.error(err);
+        }
+      });
   }
 
   const clipboard = () => {
     navigator.clipboard.writeText('localhost:3000/play' + sessionId);
   }
 
+  const toResult = () => {
+    navigate(`/result/${gameData.id}`);
+  }
+
+  const ToResultModal = () => {
+    return (
+      <Modal hide={() => setOpenResultModal(false)}>
+        Do you want to go to the result page? <br />
+        <div style={{ marginTop: '20px' }}>
+          <button onClick={() => setOpenResultModal(false)} style={{ marginRight: '20px' }}>no</button>
+          <button onClick={toResult}>yes</button>
+        </div>
+      </Modal>
+    );
+  }
+
+  const SessionDisplay = () => {
+    return (
+      <div style={{ marginBottom: '50px' }}>
+        <h4 style={{ marginBottom: '5px' }}>Session ID: {sessionId}</h4>
+        <Button variant='outlined' size='small' onClick={clipboard}>copy link</Button>
+      </div>
+    );
+  }
+
   return (
     <>
       {alert}
-      <div className={styles.block} id={props.data.id}>
-        {modalIsVisible && (
-          <Modal hide={hideModalHandler}>
-            <div>
-              Game started!
-              Copy the session id to start a game
-              Session id: {sessionId}
-              <button onClick={clipboard}> copy </button>
-            </div>
-          </Modal>
-        )}
-        {props.data.name}
-        <button className={styles.editbtm} onClick={toEditPage}> Eidt </button>
-        <button className={styles.startbtm} onClick={startGame}> start game </button>
-      </div>
+      {console.log(gameData)}
+      {openResultModal && <ToResultModal />}
+      <Block>
+        <div style={{ maxWidth: '300px' }}>
+          <h3 style={{ margin: '0' }}>{gameData.name}</h3>
+        </div>
+        <Button variant='outlined' onClick={() => navigate(`/edit/${gameData.id}`)} style={{ position: 'absolute', bottom: '10px', left: '148px' }}>Edit</Button>
+        <Button variant='outlined' color='error' onClick={deleteGame} disabled={sessionId !== null} style={{ position: 'absolute', bottom: '10px', left: '10px' }}>delete</Button>
+        {sessionId !== null && <SessionDisplay />}
+        <Button variant='outlined' color='secondary' onClick={toResult} style={{ position: 'absolute', top: '10px', right: '10px' }} >View game</Button>
+        {
+          sessionId !== null
+            ? <Button variant='contained' onClick={stopGame} style={{ position: 'absolute', bottom: '10px', right: '10px' }}>stop game</Button>
+            : <Button variant='contained' onClick={startGame} style={{ position: 'absolute', bottom: '10px', right: '10px' }}>start game</Button>
+        }
+      </Block>
     </>
   );
 }

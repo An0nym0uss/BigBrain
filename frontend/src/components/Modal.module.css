@@ -12,6 +12,6 @@
 .modal {
     border: none;
     border-radius: 6px;
-    padding: 0;
+    padding: 10px;
     z-index: 1;
 }
