@@ -1,0 +1,18 @@
+.block{
+    position: relative;
+    margin: 10px;
+    width: 20vw;
+    height: 10vh;
+    border: 1px solid black;
+}
+
+.editbtm{
+    position: absolute;
+    right: 5px;
+}
+
+.delbtm{
+    position: absolute;
+    right: 5px;
+    top: 50px;
+}
