@@ -2,102 +2,101 @@
 
 import styles from './Dashboard.module.css';
 import { Button } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backendCall from '../utils/backend';
-import serverRequest from '../utils/server';
 import Modal from '../components/Modal';
 import GameBlock from '../components/GameBlock';
-import { Context, useContext } from "../utils/context";
+import { Context, useContext } from '../utils/context';
 
 const Dashboard = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [modalIsVisible, setModalIsVisible] = useState(false);
-    const [toresult, setToresult] = useState(false);
-    const [quizName, setQuizName] = useState('');
-    const [quizList, setQuizList] = useState([{}]);
-    const { getters, setters } = useContext(Context);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [toresult, setToresult] = useState(false);
+  const [quizName, setQuizName] = useState('');
+  const [quizList, setQuizList] = useState([{}]);
+  const { getters, setters } = useContext(Context);
 
-    React.useEffect(() => {
-        if (!localStorage.getItem('token')) {
-            navigate('/login');
-        }
-        getQuizHandler();
-        let lis = quizList;
-        lis.shift();
-        setQuizList(lis);
-    }, []);
-
-    function hideModalHandler() {
-        setModalIsVisible(false);
+  React.useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      navigate('/login');
     }
-    function showModalHandler() {
-        setModalIsVisible(true);
-    }
+    getQuizHandler();
+    const lis = quizList;
+    lis.shift();
+    setQuizList(lis);
+  }, []);
 
-    function hideToresultHandler() {
-        setToresult(false);
-    }
-    function showToresultHandler() {
-        setToresult(true);
-    }
+  function hideModalHandler () {
+    setModalIsVisible(false);
+  }
+  function showModalHandler () {
+    setModalIsVisible(true);
+  }
 
-    const handleLogout = () => {
-        backendCall('/admin/auth/logout', {}, 'POST', { token: localStorage.getItem('token') })
-            .then(() => {
-                localStorage.removeItem('token');
-                navigate('/login');
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }
+  function hideToresultHandler () {
+    setToresult(false);
+  }
+  function showToresultHandler () {
+    setToresult(true);
+  }
 
-    function newQuizHandler(name) {
-        backendCall('/admin/quiz/new', { name: name }, 'POST', { token: localStorage.getItem('token') }).then(() => {
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
-        hideModalHandler();
-    }
+  const handleLogout = () => {
+    backendCall('/admin/auth/logout', {}, 'POST', { token: localStorage.getItem('token') })
+      .then(() => {
+        localStorage.removeItem('token');
+        navigate('/login');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
-    function getQuizHandler() {
-        backendCall('/admin/quiz', {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
-            setQuizList(quizList.concat(data.quizzes));
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
-    }
+  function newQuizHandler (name) {
+    backendCall('/admin/quiz/new', { name }, 'POST', { token: localStorage.getItem('token') }).then(() => {
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+    // hideModalHandler();
+    navigate('/');
+  }
 
-    function stopGame() {
+  function getQuizHandler () {
+    backendCall('/admin/quiz', {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
+      setQuizList(quizList.concat(data.quizzes));
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+  }
 
-        console.log("quizid:" + getters.quizid);
-        let path = '/admin/quiz/' + getters.quizid + '/end';
-        backendCall(path, {}, 'POST', { token: localStorage.getItem('token') }).then(() => {
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
-        setters.setSessionStarted(false);
-        showToresultHandler();
-    }
+  function stopGame () {
+    console.log('quizid:' + getters.quizid);
+    const path = '/admin/quiz/' + getters.quizid + '/end';
+    backendCall(path, {}, 'POST', { token: localStorage.getItem('token') }).then(() => {
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+    setters.setSessionStarted(false);
+    showToresultHandler();
+  }
 
-    function display() {
-        return (
-            <div className={styles.gameContainer}>
-                {quizList.map((data) => <GameBlock data={data}/>)}
-            </div>
-        )
-    }
-
-    function toResultPage() {
-        navigate(`/play/${getters.sessionid}`);
-    }
-
+  function display () {
     return (
+            <div className={styles.gameContainer}>
+                {quizList.map((data, index) => <GameBlock key={index} data={data}/>)}
+            </div>
+    )
+  }
+
+  function toResultPage () {
+    navigate(`/play/${getters.sessionid}`);
+  }
+
+  return (
         <div>
             Dashboard!
             {modalIsVisible && (
@@ -121,7 +120,7 @@ const Dashboard = () => {
             <Button onClick={toResultPage}> manage current game </Button>
             {display()}
         </div>
-    );
+  );
 }
 
 export default Dashboard;

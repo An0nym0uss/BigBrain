@@ -6,7 +6,7 @@ async function serverRequest (url, method, data, options) {
     auth = options.token ? `Bearer ${options.token}` : undefined;
   }
   const response = await fetch(config.BASE_URL + url, {
-    method: method,
+    method,
     body: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',

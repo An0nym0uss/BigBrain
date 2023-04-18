@@ -9,7 +9,7 @@ const backendCall = async (path, data, method, options) => {
     }
     const { data: responseData } = await axios({
       url: path,
-      method: method,
+      method,
       baseURL: config.BASE_URL,
       headers: {
         'Content-Type': 'application/json',

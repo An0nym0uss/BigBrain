@@ -1,169 +1,163 @@
 import styles from './Edit.module.css';
 import backendCall from '../utils/backend';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import QuesBlock from '../components/QuesBlock';
 
-
 const Edit = () => {
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [gamedata, setGameData] = useState([{
+    id: 1,
+    questilon: 'a question',
+    point: '10',
+    time: '25',
+    type: 'single'
+  }]);
+  const [type, setType] = useState('');
+  const [question, setQuestion] = useState('');
+  const [time, setTime] = useState(0);
+  const [point, setPoint] = useState(0);
+  const [numChoice, setNumChoice] = useState(2);
+  const [answers, setAnswers] = useState([]);
+  const [source, setSource] = useState('');
 
-    const [modalIsVisible, setModalIsVisible] = useState(false);
-    const [gamedata, setGameData] = useState([{
-        id: 1,
-        questilon: "a question",
-        point: "10",
-        time: "25",
-        type: "single"
-    }]);
-    const [type, setType] = useState("");
-    const [question, setQuestion] = useState("");
-    const [time, setTime] = useState(0);
-    const [point, setPoint] = useState(0);
-    const [numChoice, setNumChoice] = useState(2);
-    const [answers, setAnswers] = useState([]);
-    const [source, setSource] = useState("");
+  useEffect(() => {
+    getData();
+  }, []);
 
-    useEffect(() => {
-        getData();
-    }, []);
+  useEffect(() => {
+    updateData();
+  }, [gamedata]);
 
-    useEffect(() => {
-        updateData();
-    }, [gamedata]);
+  function hideModalHandler () {
+    setModalIsVisible(false);
+  }
+  function showModalHandler () {
+    setAnswers([]);
+    setModalIsVisible(true);
+  }
 
-    function hideModalHandler() {
-        setModalIsVisible(false);
-    }
-    function showModalHandler() {
-        setAnswers([]);
-        setModalIsVisible(true);
-    }
+  function getId () {
+    let url = window.location.href;
+    url = url.split('/');
+    return url[url.length - 1]
+  }
 
-    function getId() {
-        let url = window.location.href;
-        url = url.split('/');
-        return url[url.length -1]
-    }
+  function getData () {
+    const path = '/admin/quiz/' + getId();
+    backendCall(path, {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
+      setGameData(data);
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+    return display()
+  }
 
-    function getData() {
-        const path = '/admin/quiz/' + getId();
-        backendCall(path, {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
-            setGameData(data);
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
-        return display()
-    }
-
-    function newQues() {
-
-        let answersTemp = [];
-        for(let i=0; i<numChoice; i++) {
-            let dump = {};
-            if (document.getElementById("radio"+i).checked) {
-                dump = {
-                    answer: document.getElementById(i).value,
-                    isRight: true
-                }
-            } else {
-                dump = {
-                    answer: document.getElementById(i).value,
-                    isRight: false
-                }
-            }
-            answersTemp.push(dump)
+  function newQues () {
+    const answersTemp = [];
+    for (let i = 0; i < numChoice; i++) {
+      let dump = {};
+      if (document.getElementById('radio' + i).checked) {
+        dump = {
+          answer: document.getElementById(i).value,
+          isRight: true
         }
-        setAnswers(answersTemp);
-
-        if (type == "" || question == "" || time == "0" || answers == []) {
-            alert("please fill in all the required field");
-            return;
+      } else {
+        dump = {
+          answer: document.getElementById(i).value,
+          isRight: false
         }
+      }
+      answersTemp.push(dump)
+    }
+    setAnswers(answersTemp);
 
-        let quesData = {
-            id: Date.now(),
-            type: type,
-            question: question,
-            time: time,
-            point: point,
-            answers: answersTemp,
-            source: source
-        }
-        hideModalHandler();
-        let newData = gamedata;
-        newData.questions.push(quesData);
-        setGameData(newData);
-        updateData();
-        reset();
+    if (type === '' || question === '' || time === '0' || answers === []) {
+      alert('please fill in all the required field');
+      return;
     }
 
-    function updateData() {
-
-        console.log(gamedata.questions);
-        const path = '/admin/quiz/' + getId();
-        backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
+    const quesData = {
+      id: Date.now(),
+      type,
+      question,
+      time,
+      point,
+      answers: answersTemp,
+      source
     }
+    hideModalHandler();
+    const newData = gamedata;
+    newData.questions.push(quesData);
+    setGameData(newData);
+    updateData();
+    reset();
+  }
 
-    function reset() {
-        setAnswers([]);
-        setType("");
-        setPoint(0);
-        setTime(0);
-        setQuestion("");
-    }
+  function updateData () {
+    console.log(gamedata.questions);
+    const path = '/admin/quiz/' + getId();
+    backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+  }
 
-    function generateChoiceInput() {
+  function reset () {
+    setAnswers([]);
+    setType('');
+    setPoint(0);
+    setTime(0);
+    setQuestion('');
+  }
 
-        let inputs = [];
-        for(let i=0; i<numChoice; i++) {
-            inputs.push(
+  function generateChoiceInput () {
+    const inputs = [];
+    for (let i = 0; i < numChoice; i++) {
+      inputs.push(
                 <input type="text" id= {i} />
-            )
-            inputs.push(
-                "right answer?"
-            )
-            inputs.push(
-                <input type="radio" id= {"radio"+i}/>
-            )
-            inputs.push(
+      )
+      inputs.push(
+        'right answer?'
+      )
+      inputs.push(
+                <input type="radio" id= {'radio' + i}/>
+      )
+      inputs.push(
                 <br />
-            )
-        }
-        return inputs;
+      )
     }
+    return inputs;
+  }
 
-    function display() {
-        if (gamedata.questions) {
-            return (
+  function display () {
+    if (gamedata.questions) {
+      return (
                 <div className={styles.quesContainer}>
-                    {gamedata.questions.map((data) => <QuesBlock data={data} setData={setGameData}/>)}
+                    {gamedata.questions.map((data, index) => <QuesBlock key={`question-${index}`} data={data} setData={setGameData}/>)}
                 </div>
-            );}
-        return <div>loading...</div>
+      );
     }
+    return <div>loading...</div>
+  }
 
-
-    return (
+  return (
         <div>
             {modalIsVisible && (
                 <Modal hide={hideModalHandler}>
 
                     Type of question<br />
-                    <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} /> 
-                    <label htmlFor="single">single choice</label> 
-                    <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} /> 
+                    <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} />
+                    <label htmlFor="single">single choice</label>
+                    <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} />
                     <label htmlFor="single">multiple choice</label> <br />
 
                     The question:
                     <input type="text" onChange={(event) => setQuestion(event.target.value)}/> <br />
 
-                    Time limit: 
+                    Time limit:
                     <input type="range" name="time" min="0" max="60" defaultValue={0} onChange={(event) => setTime(event.target.value)}/>
                     {<label htmlFor="name">{time}s</label> }<br />
 
@@ -188,7 +182,7 @@ const Edit = () => {
             <button onClick={showModalHandler}> Add a question </button>
             {display()}
         </div>
-    );
+  );
 }
 
 export default Edit;

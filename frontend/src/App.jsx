@@ -6,7 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Edit from './pages/Edit';
 import QuesEdit from './pages/QuesEdit';
 import Results from './pages/Results';
-import { Context, initialValue } from "./utils/context";
+import { Context, initialValue } from './utils/context';
 
 function App () {
   const [sessionid, setSessionid] = React.useState(initialValue.sessionid);
@@ -19,9 +19,9 @@ function App () {
     sessionStarted,
   };
   const setters = {
-      setSessionid,
-      setQuizid,
-      setSessionStarted,
+    setSessionid,
+    setQuizid,
+    setSessionStarted,
   };
 
   return (

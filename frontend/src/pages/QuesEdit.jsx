@@ -1,144 +1,139 @@
-import styles from './Edit.module.css';
 import backendCall from '../utils/backend';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 const QuesEdit = () => {
+  const [type, setType] = useState('');
+  const [question, setQuestion] = useState('');
+  const [gamedata, setGameData] = useState([{
+    id: 1,
+    questilon: 'a question',
+    point: '10',
+    time: '25',
+    type: 'single'
+  }]);
+  const [time, setTime] = useState(0);
+  const [point, setPoint] = useState(0);
+  const [numChoice, setNumChoice] = useState(2);
+  const [answers, setAnswers] = useState([]);
 
-    const [type, setType] = useState("");
-    const [question, setQuestion] = useState("");
-    const [gamedata, setGameData] = useState([{
-        id: 1,
-        questilon: "a question",
-        point: "10",
-        time: "25",
-        type: "single"
-    }]);
-    const [time, setTime] = useState(0);
-    const [point, setPoint] = useState(0);
-    const [numChoice, setNumChoice] = useState(2);
-    const [answers, setAnswers] = useState([]);
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  useEffect(() => {
+    getData();
+  }, []);
 
-    useEffect(() => {
-        getData();
-    }, []);
+  useEffect(() => {
+    updateData();
+  }, [gamedata]);
 
-    useEffect(() => {
-        updateData();
-    }, [gamedata]);
+  function toEditPage () {
+    navigate(`/edit/${getId()}`);
+  }
 
-    function toEditPage() {
-        navigate(`/edit/${getId()}`);
-    }
+  function getId () {
+    let url = window.location.href;
+    url = url.split('/');
+    return url[url.length - 2]
+  }
 
-    function getId() {
-        let url = window.location.href;
-        url = url.split('/');
-        return url[url.length - 2]
-    }
+  function getQuesId () {
+    let url = window.location.href;
+    url = url.split('/');
+    return url[url.length - 1]
+  }
 
-    function getQuesId() {
-        let url = window.location.href;
-        url = url.split('/');
-        return url[url.length - 1]
-    }
-
-    function getData() {
-        const path = '/admin/quiz/' + getId();
-        backendCall(path, {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
-            setGameData(data);
-            for (let ques of data.questions) {
-                if (ques.id == getQuesId()) {
-                    setType(ques.type);
-                    setQuestion(ques.question);
-                    setTime(ques.time);
-                    setPoint(ques.point);
-                    setAnswers(ques.answers);
-                    setNumChoice(ques.answers.length)
-                }
-            }
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
-    }
-
-    function update() {
-        let answersTemp = [];
-        for(let i=0; i<numChoice; i++) {
-            if (document.getElementById(i) == "") {
-                alert("please fill in all the answers");
-                return;
-            }
-            answersTemp.push(document.getElementById(i).value)
+  function getData () {
+    const path = '/admin/quiz/' + getId();
+    backendCall(path, {}, 'GET', { token: localStorage.getItem('token') }).then((data) => {
+      setGameData(data);
+      for (const ques of data.questions) {
+        if (ques.id === getQuesId()) {
+          setType(ques.type);
+          setQuestion(ques.question);
+          setTime(ques.time);
+          setPoint(ques.point);
+          setAnswers(ques.answers);
+          setNumChoice(ques.answers.length)
         }
-        setAnswers(answersTemp);
+      }
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+  }
 
-        if (type == "" || question == "" || time == "0" || answers == []) {
-            alert("please fill in all the required field");
-            return;
-        }
+  function update () {
+    const answersTemp = [];
+    for (let i = 0; i < numChoice; i++) {
+      if (document.getElementById(i) === '') {
+        alert('please fill in all the answers');
+        return;
+      }
+      answersTemp.push(document.getElementById(i).value)
+    }
+    setAnswers(answersTemp);
 
-        let quesData = {
-            id: getQuesId(),
-            type: type,
-            question: question,
-            time: time,
-            point: point,
-            answers: answersTemp
-        }
-
-        let tempData = gamedata;
-        for (let i = 0; i < tempData.questions.length; i++) {
-            if (tempData.questions[i].id == getQuesId()) {
-                tempData.questions[i] = quesData;
-            }
-        }
-        setGameData(tempData);
-        updateData();
-        toEditPage();
+    if (type === '' || question === '' || time === '0' || answers === []) {
+      alert('please fill in all the required field');
+      return;
     }
 
-    function updateData() {
-
-        console.log(gamedata.questions);
-        const path = '/admin/quiz/' + getId();
-        backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
-        }).catch(error => {
-            console.log(error);
-            alert(error);
-        })
+    const quesData = {
+      id: getQuesId(),
+      type,
+      question,
+      time,
+      point,
+      answers: answersTemp
     }
 
-    function generateChoiceInput() {
+    const tempData = gamedata;
+    for (let i = 0; i < tempData.questions.length; i++) {
+      if (tempData.questions[i].id === getQuesId()) {
+        tempData.questions[i] = quesData;
+      }
+    }
+    setGameData(tempData);
+    updateData();
+    toEditPage();
+  }
 
-        let inputs = [];
-        for(let i=0; i<numChoice; i++) {
-            inputs.push(
+  function updateData () {
+    console.log(gamedata.questions);
+    const path = '/admin/quiz/' + getId();
+    backendCall(path, gamedata, 'PUT', { token: localStorage.getItem('token') }).then(() => {
+    }).catch(error => {
+      console.log(error);
+      alert(error);
+    })
+  }
+
+  function generateChoiceInput () {
+    const inputs = [];
+    for (let i = 0; i < numChoice; i++) {
+      inputs.push(
                 <input type="text" id= {i} value={answers[i]}/>
-            )
-            inputs.push(
+      )
+      inputs.push(
                 <br />
-            )
-        }
-        return inputs;
+      )
     }
+    return inputs;
+  }
 
-    return (
+  return (
         <div>
             Type of question<br />
-            <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} /> 
-            <label htmlFor="single">single choice</label> 
-            <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} /> 
+            <input type="radio" id="single" name="type" value="single" onClick={(event) => setType(event.target.value)} />
+            <label htmlFor="single">single choice</label>
+            <input type="radio" id="multi" name="type" value="multi" onClick={(event) => setType(event.target.value)} />
             <label htmlFor="single">multiple choice</label> <br />
 
             The question:
             <input type="text" value={question} onChange={(event) => setQuestion(event.target.value)}/> <br />
 
-            Time limit: 
+            Time limit:
             <input type="range" value={time} name="time" min="0" max="60" defaultValue={0} onChange={(event) => setTime(event.target.value)}/>
             {<label htmlFor="name">{time}s</label> }<br />
 
@@ -155,9 +150,9 @@ const QuesEdit = () => {
 
             <button onClick={update}> Update </button>
             <button onClick={toEditPage}> Cancel </button>
-            
+
         </div>
-    );
+  );
 }
 
 export default QuesEdit;
