@@ -27,7 +27,7 @@ const Results = () => {
   }, []);
 
   const advance = () => {
-    const path = '/admin/quiz/' + qid + '/' + 'start';
+    const path = `/admin/quiz/${qid}/advance`;
     backendCall(path, {}, 'POST', { token: localStorage.getItem('token') })
       .then(() => {
       })
@@ -56,7 +56,7 @@ const Results = () => {
   }
 
   const toDashboard = () => {
-    navigate('/');
+    navigate('/dashboard');
   }
 
   return (

@@ -12,13 +12,14 @@ const Login = () => {
 
   const handleLogin = () => {
     if (email === '' || password === '') {
-      alert('Email or password cannot be empty.');
+      const errMsg = 'Email or password cannot be empty.';
+      setAlert(<AlertMsg message={errMsg} successor={() => setAlert(null)} />);
       return;
     }
     backendCall('admin/auth/login', { email, password }, 'POST')
       .then(({ token }) => {
         localStorage.setItem('token', token);
-        navigate('/');
+        navigate('/dashboard');
       })
       .catch(err => {
         if (err.message) {
@@ -37,6 +38,8 @@ const Login = () => {
         <TextField required id='login-password' type='password' label='Password' onChange={(e) => { setPassword(e.target.value) }} sx={{ mb: '20px' }} />
         <Button variant='contained' onClick={handleLogin} sx={{ mb: '20px' }}>Login</Button>
         <p>Do not have an account? <a href='/register'>Sign Up here</a></p>
+        <p>OR</p>
+        <Button variant='contained' color='secondary' size='large' onClick={() => navigate('/play/join')}>Just Play</Button>
       </Box>
     </>
   );
