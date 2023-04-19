@@ -102,11 +102,11 @@ const Play = () => {
     );
   }
 
-  const getQuestion = () => {
+  const getQuestion = async () => {
     backendCall(`/play/${pid}/question`, {}, 'GET')
-      .then((data) => {
-        setData(data);
-        console.log(data);
+      .then(({ question }) => {
+        setData(question);
+        console.log(question);
       })
       .catch((err) => {
         if (err.message) {
@@ -117,9 +117,9 @@ const Play = () => {
       });
   }
 
-  React.useEffect(() => {
+  React.useEffect(async () => {
     if (started) {
-      getQuestion();
+      await getQuestion();
     }
   }, [started]);
 

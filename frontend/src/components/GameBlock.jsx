@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import AlertMsg from './AlertMsg';
 import { Button } from '@mui/material';
 import styled from 'styled-components';
+import config from '../utils/config';
 
 const Block = styled.div`
   position: relative;
@@ -80,7 +81,7 @@ const GameBlock = ({ gameData, refresh }) => {
   }
 
   const clipboard = () => {
-    navigator.clipboard.writeText(`/play/${sessionId}`);
+    navigator.clipboard.writeText(`${config.BASE_NAME}/play/${sessionId}`);
   }
 
   const toResult = () => {
