@@ -2,6 +2,11 @@ import { Box, Button } from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Initial page that asks for sign in for admins
+ * or play for guest users to just join a game.
+ * @returns Initial Page
+ */
 const InitialPage = () => {
   const navigate = useNavigate();
 

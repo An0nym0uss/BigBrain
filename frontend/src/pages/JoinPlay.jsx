@@ -4,6 +4,10 @@ import backendCall from '../utils/backend';
 import { useNavigate, useParams } from 'react-router-dom';
 import AlertMsg from '../components/AlertMsg';
 
+/**
+ * Player input name and gets player id
+ * @returns Join Page
+ */
 const JoinPlay = () => {
   const { sid } = useParams();
   const navigate = useNavigate();

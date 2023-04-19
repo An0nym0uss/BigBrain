@@ -1,6 +1,11 @@
 import React from 'react';
 import Alert from '@mui/material/Alert';
 
+/**
+ * An alert dialog interface
+ * @param {message, successor} param0 message: alert message, successor: handle close function
+ * @returns alert dialog interface
+ */
 const AlertMsg = ({ message, successor }) => {
   const handleClose = () => {
     const alert = document.querySelector('#alert');

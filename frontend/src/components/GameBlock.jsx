@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import AlertMsg from './AlertMsg';
 import { Button } from '@mui/material';
 import styled from 'styled-components';
+import config from '../utils/config';
 
 const Block = styled.div`
   position: relative;
@@ -15,6 +16,11 @@ const Block = styled.div`
   padding: 10px;
 `;
 
+/**
+ * A block of quiz that allows to start, view, edit and delete
+ * @param {gameData, refresh} param0 refresh: tells dashboard to handle refresh
+ * @returns GameBlock div
+ */
 const GameBlock = ({ gameData, refresh }) => {
   const navigate = useNavigate();
 
@@ -32,7 +38,7 @@ const GameBlock = ({ gameData, refresh }) => {
 
   // get total time after quizData updated
   useEffect(() => {
-    if(quizdata.questions != undefined) {
+    if (quizdata.questions !== undefined) {
       getTotalTime();
     }
   }, [quizdata]);
@@ -95,7 +101,7 @@ const GameBlock = ({ gameData, refresh }) => {
   }
 
   const clipboard = () => {
-    navigator.clipboard.writeText(`/play/${sessionId}`);
+    navigator.clipboard.writeText(`${config.BASE_NAME}/play/${sessionId}`);
   }
 
   const toResult = () => {
@@ -123,7 +129,7 @@ const GameBlock = ({ gameData, refresh }) => {
     );
   }
 
-  function getNumQues () {
+  const getNumQues = () => {
     const path = '/admin/quiz/' + gameData.id;
     backendCall(path, {}, 'GET', { token: localStorage.getItem('token') })
       .then((data) => {
@@ -140,10 +146,10 @@ const GameBlock = ({ gameData, refresh }) => {
       });
   }
 
-  function getTotalTime () {
+  const getTotalTime = () => {
     let timeTemp = time;
     console.log(quizdata);
-    for (let que of quizdata.questions) {
+    for (const que of quizdata.questions) {
       timeTemp += parseInt(que.time);
     }
     setTime(timeTemp);
@@ -156,7 +162,7 @@ const GameBlock = ({ gameData, refresh }) => {
       {openResultModal && <ToResultModal />}
       <Block>
         <div style={{ maxWidth: '300px' }}>
-          <h3 style={{ margin_bottom: '5px' }}>{gameData.name}</h3> 
+          <h3 style={{ margin_bottom: '5px' }}>{gameData.name}</h3>
           <span style={{ color: 'grey' }}> {numQues} questions &nbsp;&nbsp;</span>
           <span style={{ color: 'grey' }}>{time} total seconds</span>
 

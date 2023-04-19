@@ -4,6 +4,10 @@ import backendCall from '../utils/backend';
 import { useNavigate } from 'react-router-dom';
 import AlertMsg from '../components/AlertMsg';
 
+/**
+ * Login as admin
+ * @returns Login Page
+ */
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState('');

@@ -3,6 +3,10 @@ import React from 'react';
 import AlertMsg from '../components/AlertMsg';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Asks player to enter url or session id to join a running game.
+ * @returns Join Page
+ */
 const Join = () => {
   const navigate = useNavigate();
 
