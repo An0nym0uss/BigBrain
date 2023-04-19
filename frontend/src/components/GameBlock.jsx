@@ -38,7 +38,7 @@ const GameBlock = ({ gameData, refresh }) => {
 
   // get total time after quizData updated
   useEffect(() => {
-    if(quizdata.questions != undefined) {
+    if (quizdata.questions !== undefined) {
       getTotalTime();
     }
   }, [quizdata]);
@@ -129,7 +129,7 @@ const GameBlock = ({ gameData, refresh }) => {
     );
   }
 
-  function getNumQues () {
+  const getNumQues = () => {
     const path = '/admin/quiz/' + gameData.id;
     backendCall(path, {}, 'GET', { token: localStorage.getItem('token') })
       .then((data) => {
@@ -146,10 +146,10 @@ const GameBlock = ({ gameData, refresh }) => {
       });
   }
 
-  function getTotalTime () {
+  const getTotalTime = () => {
     let timeTemp = time;
     console.log(quizdata);
-    for (let que of quizdata.questions) {
+    for (const que of quizdata.questions) {
       timeTemp += parseInt(que.time);
     }
     setTime(timeTemp);
@@ -162,7 +162,7 @@ const GameBlock = ({ gameData, refresh }) => {
       {openResultModal && <ToResultModal />}
       <Block>
         <div style={{ maxWidth: '300px' }}>
-          <h3 style={{ margin_bottom: '5px' }}>{gameData.name}</h3> 
+          <h3 style={{ margin_bottom: '5px' }}>{gameData.name}</h3>
           <span style={{ color: 'grey' }}> {numQues} questions &nbsp;&nbsp;</span>
           <span style={{ color: 'grey' }}>{time} total seconds</span>
 
