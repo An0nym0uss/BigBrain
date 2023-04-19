@@ -16,9 +16,11 @@ const Play = () => {
     const interval = setInterval(() => {
       if (count <= 0) {
         const answers = [];
-        for (let i = 0; i < data.answers.length; i++) {
-          if (document.getElementById('choice' + i).checked) {
-            answers.push(i)
+        if (data.answers) {
+          for (let i = 0; i < data.answers.length; i++) {
+            if (document.getElementById('choice' + i).checked) {
+              answers.push(i)
+            }
           }
         }
 
@@ -55,12 +57,14 @@ const Play = () => {
       const [selected, setSelected] = React.useState(null);
 
       return (
-        Array.from({ length: data.answers.length }, (_, index) => (
-          <div key={`chocice-${index}`}>
-            <label htmlFor={`choice${index}`}>{data.answers[index].answer}</label>
-            <input type='radio' id={'choice' + index} checked={selected === index} onChange={() => setSelected(index)} />
-          </div>
-        ))
+        data.answers
+          ? Array.from({ length: data.answers.length }, (_, index) => (
+            <div key={`chocice-${index}`}>
+              <label htmlFor={`choice${index}`}>{data.answers[index].answer}</label>
+              <input type='radio' id={'choice' + index} checked={selected === index} onChange={() => setSelected(index)} />
+            </div>
+          ))
+          : <></>
       );
     }
 
@@ -81,9 +85,12 @@ const Play = () => {
           <SingleChoice />
         );
       } else if (data.type === 'multi') {
-        return Array.from({ length: data.answers.length }, (_, index) => (
-          <MultiChoice key={`chocice-${index}`} index={index} />
-        ));
+        return (
+          data.answers
+            ? Array.from({ length: data.answers.length }, (_, index) => (
+              <MultiChoice key={`chocice-${index}`} index={index} />))
+            : <></>
+        );
       } else {
         return (
           <></>
