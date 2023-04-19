@@ -20,7 +20,7 @@ const JoinPlay = () => {
       setAlert(<AlertMsg message='name cannot be empty' successor={() => setAlert(null)} />);
       return;
     }
-    backendCall(`/play/join/${sid}`, { name: name }, 'POST')
+    backendCall(`/play/join/${sid}`, { name }, 'POST')
       .then(({ playerId }) => {
         navigate(`/play/${sid}/${playerId}`);
       })
