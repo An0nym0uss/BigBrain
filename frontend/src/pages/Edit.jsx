@@ -152,6 +152,8 @@ const Edit = () => {
       </div>
     );
   }
+
+  // render a number of input dynamically depend on user input
   const generateChoiceInput = () => {
     if (type === 'single') {
       return (

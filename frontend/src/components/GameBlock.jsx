@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import backendCall from '../utils/backend';
 import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,22 @@ const GameBlock = ({ gameData, refresh }) => {
 
   const [sessionId, setSessionId] = useState(gameData.active);
   const [alert, setAlert] = useState(null);
+  const [numQues, setnumQues] = useState(0);
+  const [quizdata, setQuizdata] = useState([]);
+  const [time, setTime] = useState(0);
   const [openResultModal, setOpenResultModal] = useState(false);
+
+  // get number of question data at first render
+  useEffect(() => {
+    getNumQues();
+  }, []);
+
+  // get total time after quizData updated
+  useEffect(() => {
+    if(quizdata.questions != undefined) {
+      getTotalTime();
+    }
+  }, [quizdata]);
 
   const startGame = () => {
     const path = `/admin/quiz/${gameData.id}/start`;
@@ -108,6 +123,32 @@ const GameBlock = ({ gameData, refresh }) => {
     );
   }
 
+  function getNumQues () {
+    const path = '/admin/quiz/' + gameData.id;
+    backendCall(path, {}, 'GET', { token: localStorage.getItem('token') })
+      .then((data) => {
+        console.log(data);
+        setnumQues(data.questions.length);
+        setQuizdata(data);
+      })
+      .catch(err => {
+        if (err.message) {
+          setAlert(<AlertMsg message={err.message} successor={() => setAlert(null)} />)
+        } else {
+          console.error(err);
+        }
+      });
+  }
+
+  function getTotalTime () {
+    let timeTemp = time;
+    console.log(quizdata);
+    for (let que of quizdata.questions) {
+      timeTemp += parseInt(que.time);
+    }
+    setTime(timeTemp);
+  }
+
   return (
     <>
       {alert}
@@ -115,7 +156,10 @@ const GameBlock = ({ gameData, refresh }) => {
       {openResultModal && <ToResultModal />}
       <Block>
         <div style={{ maxWidth: '300px' }}>
-          <h3 style={{ margin: '0' }}>{gameData.name}</h3>
+          <h3 style={{ margin_bottom: '5px' }}>{gameData.name}</h3> 
+          <span style={{ color: 'grey' }}> {numQues} questions &nbsp;&nbsp;</span>
+          <span style={{ color: 'grey' }}>{time} total seconds</span>
+
         </div>
         <Button variant='outlined' onClick={() => navigate(`/edit/${gameData.id}`)} style={{ position: 'absolute', bottom: '10px', left: '148px' }}>Edit</Button>
         <Button variant='outlined' color='error' onClick={deleteGame} disabled={sessionId !== null} style={{ position: 'absolute', bottom: '10px', left: '10px' }}>delete</Button>
