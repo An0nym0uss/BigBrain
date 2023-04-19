@@ -4,6 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AlertMsg from '../components/AlertMsg';
 import { Button } from '@mui/material';
 
+/**
+ * Admin can advance quiz and display result.
+ * @returns Result page
+ */
 const Results = () => {
   const { qid } = useParams();
   const [sessionId, setSessionId] = React.useState(null);

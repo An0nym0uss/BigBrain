@@ -4,6 +4,10 @@ import { useParams } from 'react-router-dom';
 import backendCall from '../utils/backend';
 import AlertMsg from '../components/AlertMsg';
 
+/**
+ * Player waits for quiz to start and answer qustions
+ * @returns Play Page
+ */
 const Play = () => {
   const { pid } = useParams();
   const [alert, setAlert] = React.useState(null);
@@ -13,6 +17,8 @@ const Play = () => {
 
   const Question = () => {
     const [count, setCount] = React.useState(parseInt(data.time, 10));
+
+    // count down then push and get answers.
     const interval = setInterval(() => {
       if (count <= 0) {
         const answers = [];
@@ -47,7 +53,7 @@ const Play = () => {
               console.error(err);
             }
           });
-        clearInterval(interval)
+        clearInterval(interval);
       } else {
         setCount(count => count - 1);
       }
@@ -58,12 +64,15 @@ const Play = () => {
 
       return (
         data.answers
-          ? Array.from({ length: data.answers.length }, (_, index) => (
-            <div key={`chocice-${index}`}>
-              <label htmlFor={`choice${index}`}>{data.answers[index].answer}</label>
-              <input type='radio' id={'choice' + index} checked={selected === index} onChange={() => setSelected(index)} />
-            </div>
-          ))
+          ? <>
+            <h3>{count}</h3>
+            {Array.from({ length: data.answers.length }, (_, index) => (
+              <div key={`chocice-${index}`}>
+                <label htmlFor={`choice${index}`}>{data.answers[index].answer}</label>
+                <input type='radio' id={'choice' + index} checked={selected === index} onChange={() => setSelected(index)} />
+              </div>
+            ))}
+          </>
           : <></>
       );
     }
@@ -79,6 +88,7 @@ const Play = () => {
       );
     }
 
+    // choices of the question
     const Choices = () => {
       if (data.type === 'single') {
         return (
@@ -87,8 +97,11 @@ const Play = () => {
       } else if (data.type === 'multi') {
         return (
           data.answers
-            ? Array.from({ length: data.answers.length }, (_, index) => (
-              <MultiChoice key={`chocice-${index}`} index={index} />))
+            ? <>
+              <h3>{count}</h3>
+              {Array.from({ length: data.answers.length }, (_, index) => (
+                <MultiChoice key={`chocice-${index}`} index={index} />))}
+            </>
             : <></>
         );
       } else {
@@ -124,6 +137,7 @@ const Play = () => {
       });
   }
 
+  // get question after game started
   React.useEffect(async () => {
     if (started) {
       await getQuestion();

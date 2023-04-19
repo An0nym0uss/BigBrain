@@ -3,6 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AlertMsg from '../components/AlertMsg';
 
+/**
+ * Setup question type and answers etc...
+ * @returns Edit question modal
+ */
 const QuesEdit = () => {
   const [type, setType] = useState('');
   const [question, setQuestion] = useState('');

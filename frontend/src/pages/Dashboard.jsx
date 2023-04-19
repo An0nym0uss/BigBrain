@@ -8,6 +8,10 @@ import Modal from '../components/Modal';
 import GameBlock from '../components/GameBlock';
 import AlertMsg from '../components/AlertMsg';
 
+/**
+ * Dashboard for admin, contains list of quizzes
+ * @returns Dashboard Page
+ */
 const Dashboard = () => {
   const navigate = useNavigate();
 

@@ -16,6 +16,11 @@ const Block = styled.div`
   padding: 10px;
 `;
 
+/**
+ * A block of quiz that allows to start, view, edit and delete
+ * @param {gameData, refresh} param0 refresh: tells dashboard to handle refresh
+ * @returns GameBlock div
+ */
 const GameBlock = ({ gameData, refresh }) => {
   const navigate = useNavigate();
 

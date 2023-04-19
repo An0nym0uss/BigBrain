@@ -4,6 +4,11 @@ import styles from './QuesBlock.module.css';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Display question and able to edit or delete the question.
+ * @param {data: question data} props  question data
+ * @returns Question Block
+ */
 const QuesBlock = (props) => {
   const navigate = useNavigate();
   const [alert, setAlert] = React.useState(null);
@@ -47,7 +52,7 @@ const QuesBlock = (props) => {
         {props.data.question}
         <br />
         {props.data.type} choice
-        <button className={styles.editbtm} onClick={toEditQuesPage}> Eidt </button>
+        <button className={styles.editbtm} onClick={toEditQuesPage}> Edit </button>
         <button className={styles.delbtm} onClick={QuesDelete}> Delete </button>
       </div>
     </>

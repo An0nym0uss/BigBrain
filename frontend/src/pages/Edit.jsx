@@ -6,6 +6,10 @@ import AlertMsg from '../components/AlertMsg';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Admin can edit questions in the quiz.
+ * @returns Edit Page
+ */
 const Edit = () => {
   const navigate = useNavigate();
   const [modalIsVisible, setModalIsVisible] = useState(false);
